@@ -1,188 +1,182 @@
-@extends('layouts.simple')
+@extends('layouts.app')
 
 @section('content')
-<div class="space-y-6">
+<div class="container mx-auto px-4 py-8">
 
-    <!-- Progress Bar for Parking Capacity -->
-    <div class="bg-white rounded-lg shadow p-6">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl shadow-xl p-6 text-white mb-8">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold">MallPark Parking System</h1>
+                <p class="text-blue-100 mt-1">Welcome back, {{ Auth::user()->name }}!</p>
+            </div>
+            <div class="text-right">
+                <div class="text-sm opacity-80">{{ date('l, F j, Y') }}</div>
+                <div class="text-2xl font-mono" id="liveClock">{{ date('h:i A') }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-8">
+        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">Total Slots</p>
+                    <p class="text-3xl font-bold text-blue-600">{{ $totalSlots ?? 0 }}</p>
+                </div>
+                <i class="fas fa-parking text-blue-500 text-3xl"></i>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">Occupied</p>
+                    <p class="text-3xl font-bold text-red-600">{{ $occupiedSlots ?? 0 }}</p>
+                </div>
+                <i class="fas fa-car text-red-500 text-3xl"></i>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">Available</p>
+                    <p class="text-3xl font-bold text-green-600">{{ $availableSlots ?? 0 }}</p>
+                </div>
+                <i class="fas fa-check-circle text-green-500 text-3xl"></i>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm opacity-90">Active Vehicles</p>
+                    <p class="text-3xl font-bold">{{ $activeVehicles ?? 0 }}</p>
+                </div>
+                <i class="fas fa-users text-white text-3xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
         <div class="flex justify-between items-center mb-2">
-            <h3 class="font-bold text-gray-700">
-                <i class="fas fa-chart-line mr-2 text-blue-500"></i>
-                Parking Capacity: {{ $occupiedSlots }} / 50 Vehicles
-            </h3>
-            <span class="text-sm font-semibold {{ $occupiedSlots >= 50 ? 'text-red-600' : ($occupiedSlots >= 40 ? 'text-yellow-600' : 'text-green-600') }}">
-                {{ round(($occupiedSlots / 50) * 100) }}% Full
-            </span>
+            <span class="font-semibold text-gray-700">Parking Capacity</span>
+            <span class="text-sm font-bold">{{ $occupiedSlots ?? 0 }} / 50 Slots</span>
         </div>
         <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
             <div class="h-4 rounded-full transition-all duration-500
-                {{ $occupiedSlots >= 50 ? 'bg-red-600' : ($occupiedSlots >= 40 ? 'bg-yellow-500' : 'bg-green-500') }}"
-                style="width: {{ ($occupiedSlots / 50) * 100 }}%">
+                {{ ($occupiedSlots ?? 0) >= 50 ? 'bg-red-500' : 'bg-green-500' }}"
+                style="width: {{ (($occupiedSlots ?? 0) / 50) * 100 }}%">
             </div>
         </div>
-        @if($occupiedSlots >= 50)
-            <div class="mt-3 bg-red-100 border-l-4 border-red-500 text-red-700 p-3 rounded alert-animation">
-                <div class="flex items-center">
-                    <i class="fas fa-ban text-2xl mr-3"></i>
-                    <div>
-                        <strong>⚠️ PARKING IS FULL!</strong>
-                        <p class="text-sm">Maximum capacity of 50 vehicles reached. No check-ins allowed until a vehicle checks out.</p>
-                    </div>
-                </div>
-            </div>
-        @elseif($occupiedSlots >= 40)
-            <div class="mt-3 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-3 rounded">
-                <div class="flex items-center">
-                    <i class="fas fa-exclamation-triangle text-xl mr-3"></i>
-                    <div>
-                        <strong>⚠️ Limited Slots Available!</strong>
-                        <p class="text-sm">Only {{ 50 - $occupiedSlots }} slots remaining. Parking is filling up fast!</p>
-                    </div>
-                </div>
-            </div>
-        @endif
+        <div class="mt-2 text-sm text-gray-500 text-center">
+            {{ 50 - ($occupiedSlots ?? 0) }} slots remaining
+        </div>
     </div>
 
-    <!-- KPI Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
-            <i class="fas fa-parking text-blue-500 text-3xl"></i>
-            <p class="text-2xl font-bold mt-2">{{ $totalSlots }}</p>
-            <p class="text-gray-500">Total Slots</p>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
-            <i class="fas fa-car text-red-500 text-3xl"></i>
-            <p class="text-2xl font-bold mt-2">{{ $occupiedSlots }}</p>
-            <p class="text-gray-500">Occupied</p>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
-            <i class="fas fa-check-circle text-green-500 text-3xl"></i>
-            <p class="text-2xl font-bold mt-2">{{ 50 - $occupiedSlots }}</p>
-            <p class="text-gray-500">Available</p>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
-            <i class="fas fa-users text-purple-500 text-3xl"></i>
-            <p class="text-2xl font-bold mt-2">{{ $activeVehicles }}</p>
-            <p class="text-gray-500">Active Vehicles</p>
-        </div>
-        <div class="bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg shadow p-6 text-white">
-            <i class="fas fa-dollar-sign text-3xl"></i>
-            <p class="text-2xl font-bold mt-2">${{ number_format($todayRevenue, 2) }}</p>
-            <p class="text-sm opacity-90">Today's Revenue</p>
+    <!-- Full Alert -->
+    @if(isset($isFull) && $isFull)
+    <div class="bg-red-500 text-white rounded-xl shadow-lg p-4 mb-8 animate-pulse">
+        <div class="flex items-center">
+            <i class="fas fa-exclamation-triangle text-2xl mr-3"></i>
+            <div>
+                <strong class="text-lg">⚠️ PARKING IS FULL!</strong>
+                <p>Maximum capacity of 50 vehicles reached. No check-ins allowed.</p>
+            </div>
         </div>
     </div>
+    @endif
 
     <!-- Check-in Form -->
-    <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-xl font-bold mb-4"><i class="fas fa-sign-in-alt mr-2 text-blue-500"></i>Check-in Vehicle</h2>
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <h2 class="text-2xl font-bold mb-4">
+            <i class="fas fa-sign-in-alt text-blue-500 mr-2"></i>Check-in Vehicle
+        </h2>
 
-        @if($occupiedSlots >= 50)
-        <div class="bg-red-50 border border-red-300 rounded-lg p-4 text-center">
+        @if(isset($isFull) && $isFull)
+        <div class="bg-red-50 border-2 border-red-300 rounded-xl p-6 text-center">
             <i class="fas fa-ban text-red-500 text-4xl mb-2"></i>
-            <p class="text-red-600 font-bold">PARKING FULL</p>
-            <p class="text-red-500 text-sm">Cannot accept new check-ins. Maximum capacity reached.</p>
+            <p class="text-red-600 font-bold">PARKING FULL - No check-ins allowed</p>
         </div>
         @else
         <form id="checkinForm" class="grid grid-cols-1 md:grid-cols-4 gap-4">
             @csrf
-            <input type="text" id="guest_name" placeholder="Guest Name" class="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-            <input type="text" id="vehicle_plate" placeholder="Vehicle Plate" class="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-            <select id="user_type" class="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                <option value="regular">Regular</option>
+            <input type="text" id="guest_name" placeholder="Guest Name" class="border-2 border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            <input type="text" id="vehicle_plate" placeholder="Vehicle Plate" class="border-2 border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            <select id="user_type" class="border-2 border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="regular">Regular ($2/hour)</option>
                 <option value="pwd">PWD (20% discount)</option>
-                <option value="senior">Senior Citizen (20% discount)</option>
+                <option value="senior">Senior (20% discount)</option>
             </select>
-            <button type="submit" class="bg-blue-600 text-white rounded-lg p-2 hover:bg-blue-700 transition">
+            <button type="submit" class="bg-blue-600 text-white rounded-lg p-3 hover:bg-blue-700 transition">
                 <i class="fas fa-parking"></i> Check-in
             </button>
         </form>
+        <!-- Updated free minutes message -->
         <div class="mt-3 text-sm text-gray-500">
-            <i class="fas fa-info-circle"></i> Available slots: <strong class="text-green-600">{{ 50 - $occupiedSlots }}</strong> out of 50
+            <i class="fas fa-info-circle"></i> <strong class="text-green-600">First 1 minute FREE</strong> | Then $2 per hour
+            @if(!isset($isFull) || !$isFull)
+            <span class="ml-2">Available: <strong class="text-green-600">{{ $availableSlots ?? 0 }}</strong> / 50 slots</span>
+            @endif
         </div>
         @endif
     </div>
 
-    <!-- Parking Map -->
-    <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-xl font-bold mb-4"><i class="fas fa-map"></i> Parking Map - Find Your Vehicle</h2>
+    <!-- Parking Map Preview -->
+    <div class="bg-white rounded-xl shadow-lg p-6">
+        <h2 class="text-2xl font-bold mb-4">
+            <i class="fas fa-map-marked-alt text-blue-500 mr-2"></i>Parking Map Preview
+        </h2>
         <div class="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-10 gap-2">
-            @foreach($slots as $slot)
-            <div class="border rounded-lg p-2 text-center cursor-pointer hover:shadow-lg transition slot-card text-xs
-                {{ $slot->status == 'occupied' ? 'bg-red-100 border-red-400' : ($slot->type == 'pwd' || $slot->type == 'senior' ? 'bg-yellow-100 border-yellow-400' : 'bg-green-100 border-green-400') }}">
+            @foreach($slots ?? [] as $slot)
+            <div class="border-2 rounded-lg p-2 text-center text-xs cursor-pointer
+                {{ $slot->status == 'occupied' ? 'bg-red-100 border-red-400' : 'bg-green-100 border-green-400' }}"
+                onclick="alert('Slot: {{ $slot->slot_number }}\nFloor: {{ $slot->floor }}\nStatus: {{ ucfirst($slot->status) }}\nType: {{ ucfirst($slot->type) }}')">
                 <i class="fas fa-{{ $slot->status == 'occupied' ? 'car' : 'parking' }} text-lg"></i>
-                <p class="font-bold text-xs">{{ $slot->slot_number }}</p>
-                <p class="text-xs">Floor: {{ $slot->floor }}</p>
+                <p class="font-bold">{{ $slot->slot_number }}</p>
+                <p class="text-gray-600">{{ $slot->floor }}</p>
                 @if($slot->status == 'occupied' && $slot->activeTransaction)
-                    <p class="text-xs truncate font-mono">{{ $slot->activeTransaction->vehicle_plate }}</p>
+                    <p class="text-xs text-red-600 truncate">{{ $slot->activeTransaction->vehicle_plate }}</p>
                 @endif
             </div>
             @endforeach
         </div>
-        <div class="mt-4 text-sm text-gray-500 flex flex-wrap gap-4">
-            <span><i class="fas fa-square text-green-400"></i> Available ({{ 50 - $occupiedSlots }})</span>
-            <span><i class="fas fa-square text-red-400"></i> Occupied ({{ $occupiedSlots }})</span>
-            <span><i class="fas fa-square text-yellow-400"></i> PWD/Senior Priority</span>
+        <div class="mt-4 text-center text-sm text-gray-500">
+            <a href="{{ url('/user-map') }}" class="text-blue-600 hover:underline">
+                <i class="fas fa-map"></i> View Full Map to Find Your Vehicle
+            </a>
         </div>
-    </div>
-
-    <!-- Recent Transactions -->
-    <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-xl font-bold mb-4"><i class="fas fa-history"></i> Recent Activity</h2>
-
-        @if(isset($recentTransactions) && $recentTransactions->count() > 0)
-        <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead class="bg-gray-100">
-                    <tr>
-                        <th class="p-2 text-left">Guest</th>
-                        <th class="p-2 text-left">Plate</th>
-                        <th class="p-2 text-left">Type</th>
-                        <th class="p-2 text-left">Slot</th>
-                        <th class="p-2 text-left">Status</th>
-                        <th class="p-2 text-left">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($recentTransactions as $trans)
-                    <tr class="border-b hover:bg-gray-50">
-                        <td class="p-2">{{ $trans->guest_name }}</td>
-                        <td class="p-2 font-mono text-sm">{{ $trans->vehicle_plate }}</td>
-                        <td class="p-2">{{ ucfirst($trans->user_type) }}</td>
-                        <td class="p-2">{{ $trans->parkingSlot->slot_number ?? 'N/A' }} ({!! $trans->parkingSlot->floor ?? 'N/A' !!})</td>
-                        <td class="p-2">
-                            <span class="px-2 py-1 rounded text-xs {{ $trans->status == 'active' ? 'bg-green-200 text-green-800' : 'bg-gray-200 text-gray-800' }}">
-                                {{ ucfirst($trans->status) }}
-                            </span>
-                        </td>
-                        <td class="p-2">
-                            @if($trans->status == 'active')
-                            <button onclick="checkoutVehicle({{ $trans->id }})" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition">
-                                <i class="fas fa-sign-out-alt"></i> Check-out
-                            </button>
-                            @else
-                            <span class="text-green-600 font-semibold">${{ number_format($trans->amount, 2) }}</span>
-                            @endif
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+        <!-- Updated legend with 1 minute free -->
+        <div class="mt-4 flex flex-wrap justify-center gap-4 text-xs text-gray-500">
+            <span><i class="fas fa-square text-green-400"></i> Available</span>
+            <span><i class="fas fa-square text-red-400"></i> Occupied</span>
+            <span><i class="fas fa-square text-yellow-400"></i> PWD/Senior</span>
+            <span><i class="fas fa-clock"></i> 1 min free</span>
+            <span><i class="fas fa-dollar-sign"></i> $2/hour</span>
+            <span><i class="fas fa-wheelchair"></i> 20% discount</span>
         </div>
-        @else
-        <div class="text-center py-8 text-gray-500">
-            <i class="fas fa-receipt text-4xl mb-2"></i>
-            <p>No recent transactions</p>
-        </div>
-        @endif
     </div>
 </div>
 
-@push('scripts')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
+// Live Clock
+function updateClock() {
+    const now = new Date();
+    document.getElementById('liveClock').innerHTML = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+}
+setInterval(updateClock, 1000);
+updateClock();
+
 // Check-in Form
 $('#checkinForm').on('submit', function(e) {
     e.preventDefault();
-    var btn = $(this).find('button[type="submit"]');
+    const btn = $(this).find('button[type="submit"]');
     btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Processing...');
 
     $.post('/checkin', {
@@ -191,47 +185,14 @@ $('#checkinForm').on('submit', function(e) {
         user_type: $('#user_type').val(),
         _token: '{{ csrf_token() }}'
     }, function(response) {
-        Swal.fire('Success!', `Slot: ${response.slot} (Floor ${response.floor})`, 'success')
-            .then(() => location.reload());
+        if(response.success) {
+            Swal.fire('Success!', `Slot: ${response.slot} (Floor ${response.floor})`, 'success')
+                .then(() => location.reload());
+        }
     }).fail(function(xhr) {
         Swal.fire('Error!', xhr.responseJSON?.error || 'Check-in failed', 'error');
         btn.prop('disabled', false).html('<i class="fas fa-parking"></i> Check-in');
     });
 });
-
-// Checkout Function
-function checkoutVehicle(id) {
-    Swal.fire({
-        title: 'Check-out vehicle?',
-        text: "Calculate payment and free the slot",
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, check out!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire({ title: 'Processing...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
-            $.ajax({
-                url: '/checkout/' + id,
-                type: 'POST',
-                data: { _token: '{{ csrf_token() }}', _method: 'PUT' },
-                success: function(response) {
-                    if (response.success) {
-                        Swal.fire('Success!', `Amount: $${response.amount}`, 'success')
-                            .then(() => location.reload());
-                    } else {
-                        Swal.fire('Error', response.error, 'error');
-                    }
-                },
-                error: function() {
-                    Swal.fire('Error', 'Checkout failed', 'error');
-                }
-            });
-        }
-    });
-}
 </script>
-@endpush
 @endsection

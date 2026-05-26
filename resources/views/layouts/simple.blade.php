@@ -53,7 +53,7 @@
                     </div>
                 </div>
 
-                <!-- Navigation Links -->
+                <!-- Navigation Links - Using url() instead of route() -->
                 <div class="hidden md:flex space-x-8">
                     <a href="{{ url('/dashboard') }}" class="text-gray-700 hover:text-blue-600 transition font-medium">
                         <i class="fas fa-chart-line mr-1"></i> Dashboard
@@ -72,7 +72,7 @@
                     </a>
                 </div>
 
-                <!-- User Section - Fixed (no profile.edit) -->
+                <!-- User Section -->
                 <div class="flex items-center space-x-4">
                     @auth
                         <div class="relative group">
