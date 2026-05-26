@@ -64,7 +64,9 @@
     <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
         <div class="flex justify-between items-center mb-2">
             <span class="font-semibold text-gray-700">Parking Capacity</span>
-            <span class="text-sm font-bold">{{ $occupiedSlots ?? 0 }} / 50 Slots</span>
+            <span class="text-sm font-bold {{ ($occupiedSlots ?? 0) >= 50 ? 'text-red-600' : 'text-green-600' }}">
+                {{ $occupiedSlots ?? 0 }} / 50 Slots
+            </span>
         </div>
         <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
             <div class="h-4 rounded-full transition-all duration-500
@@ -115,7 +117,6 @@
                 <i class="fas fa-parking"></i> Check-in
             </button>
         </form>
-        <!-- Updated free minutes message -->
         <div class="mt-3 text-sm text-gray-500">
             <i class="fas fa-info-circle"></i> <strong class="text-green-600">First 1 minute FREE</strong> | Then $2 per hour
             @if(!isset($isFull) || !$isFull)
@@ -132,24 +133,30 @@
         </h2>
         <div class="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-10 gap-2">
             @foreach($slots ?? [] as $slot)
-            <div class="border-2 rounded-lg p-2 text-center text-xs cursor-pointer
+            <div class="border-2 rounded-lg p-2 text-center text-xs cursor-pointer transition hover:shadow-md
                 {{ $slot->status == 'occupied' ? 'bg-red-100 border-red-400' : 'bg-green-100 border-green-400' }}"
                 onclick="alert('Slot: {{ $slot->slot_number }}\nFloor: {{ $slot->floor }}\nStatus: {{ ucfirst($slot->status) }}\nType: {{ ucfirst($slot->type) }}')">
                 <i class="fas fa-{{ $slot->status == 'occupied' ? 'car' : 'parking' }} text-lg"></i>
                 <p class="font-bold">{{ $slot->slot_number }}</p>
                 <p class="text-gray-600">{{ $slot->floor }}</p>
                 @if($slot->status == 'occupied' && $slot->activeTransaction)
-                    <p class="text-xs text-red-600 truncate">{{ $slot->activeTransaction->vehicle_plate }}</p>
+                    <p class="text-xs text-red-600 truncate" title="{{ $slot->activeTransaction->vehicle_plate }}">
+                        {{ $slot->activeTransaction->vehicle_plate }}
+                    </p>
+                @else
+                    <p class="text-xs text-green-600 mt-1">Available</p>
                 @endif
             </div>
             @endforeach
         </div>
         <div class="mt-4 text-center text-sm text-gray-500">
+            <a href="{{ url('/user-overview') }}" class="text-blue-600 hover:underline mr-3">
+                <i class="fas fa-eye"></i> View Full Overview
+            </a>
             <a href="{{ url('/user-map') }}" class="text-blue-600 hover:underline">
-                <i class="fas fa-map"></i> View Full Map to Find Your Vehicle
+                <i class="fas fa-map"></i> Find Your Vehicle
             </a>
         </div>
-        <!-- Updated legend with 1 minute free -->
         <div class="mt-4 flex flex-wrap justify-center gap-4 text-xs text-gray-500">
             <span><i class="fas fa-square text-green-400"></i> Available</span>
             <span><i class="fas fa-square text-red-400"></i> Occupied</span>
@@ -186,8 +193,13 @@ $('#checkinForm').on('submit', function(e) {
         _token: '{{ csrf_token() }}'
     }, function(response) {
         if(response.success) {
-            Swal.fire('Success!', `Slot: ${response.slot} (Floor ${response.floor})`, 'success')
-                .then(() => location.reload());
+            Swal.fire({
+                icon: 'success',
+                title: '✓ Checked In!',
+                html: `<strong>${response.guest_name}</strong><br>Slot: ${response.slot} (Floor ${response.floor})<br>Remaining: ${response.remaining}/50`,
+                timer: 2000,
+                showConfirmButton: false
+            }).then(() => location.reload());
         }
     }).fail(function(xhr) {
         Swal.fire('Error!', xhr.responseJSON?.error || 'Check-in failed', 'error');

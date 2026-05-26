@@ -82,6 +82,31 @@ class ParkingController extends Controller
             'totalSlots', 'occupiedSlots', 'availableSlots', 'isFull', 'pwdCount', 'seniorCount'));
     }
 
+    // ==================== USER OVERVIEW - 50 SLOTS WITH FLOOR VIEW ====================
+    public function userOverview()
+    {
+        $slots = ParkingSlot::with('activeTransaction')
+            ->orderBy('floor')
+            ->orderBy('slot_number')
+            ->get();
+
+        $slotsByFloor = $slots->groupBy('floor');
+        $activeVehicles = ParkingTransaction::with('parkingSlot')
+            ->where('status', 'active')
+            ->get();
+
+        $totalSlots = 50;
+        $occupiedSlots = ParkingSlot::where('status', 'occupied')->count();
+        $availableSlots = $totalSlots - $occupiedSlots;
+        $isFull = $occupiedSlots >= 50;
+
+        $pwdCount = ParkingTransaction::where('status', 'active')->where('user_type', 'pwd')->count();
+        $seniorCount = ParkingTransaction::where('status', 'active')->where('user_type', 'senior')->count();
+
+        return view('user-overview', compact('slots', 'slotsByFloor', 'activeVehicles',
+            'totalSlots', 'occupiedSlots', 'availableSlots', 'isFull', 'pwdCount', 'seniorCount'));
+    }
+
     // ==================== ACTIVE VEHICLES ====================
     public function activeVehicles()
     {

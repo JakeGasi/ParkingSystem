@@ -18,6 +18,9 @@ Route::middleware(['auth'])->group(function () {
     // ==================== MAIN DASHBOARD ====================
     Route::get('/dashboard', [ParkingController::class, 'dashboard'])->name('dashboard');
 
+    // ==================== USER OVERVIEW - 50 SLOTS WITH FLOOR VIEW ====================
+    Route::get('/user-overview', [ParkingController::class, 'userOverview'])->name('user.overview');
+
     // ==================== USER MAP - FIND VEHICLE ====================
     Route::get('/user-map', [ParkingController::class, 'userMap'])->name('user.map');
     Route::get('/user-view', [ParkingController::class, 'userView'])->name('user.view');

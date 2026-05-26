@@ -9,6 +9,19 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .nav-link {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .nav-link:hover {
+            transform: translateY(-2px);
+        }
+        .nav-link.active {
+            color: #3b82f6;
+            border-bottom: 2px solid #3b82f6;
+        }
+    </style>
 </head>
 <body class="bg-gray-100">
 
@@ -27,19 +40,22 @@
                 </div>
 
                 <div class="hidden md:flex space-x-6">
-                    <a href="{{ url('/dashboard') }}" class="text-gray-700 hover:text-blue-600 transition font-medium">
+                    <a href="{{ url('/dashboard') }}" class="nav-link text-gray-700 hover:text-blue-600 transition font-medium">
                         <i class="fas fa-chart-line mr-1"></i> Dashboard
                     </a>
-                    <a href="{{ url('/user-map') }}" class="text-gray-700 hover:text-blue-600 transition font-medium">
+                    <a href="{{ url('/user-overview') }}" class="nav-link text-gray-700 hover:text-blue-600 transition font-medium">
+                        <i class="fas fa-parking mr-1"></i> Parking Overview
+                    </a>
+                    <a href="{{ url('/user-map') }}" class="nav-link text-gray-700 hover:text-blue-600 transition font-medium">
                         <i class="fas fa-map-marked-alt mr-1"></i> Find Vehicle
                     </a>
-                    <a href="{{ url('/active-vehicles') }}" class="text-gray-700 hover:text-blue-600 transition font-medium">
+                    <a href="{{ url('/active-vehicles') }}" class="nav-link text-gray-700 hover:text-blue-600 transition font-medium">
                         <i class="fas fa-car-side mr-1"></i> Active Vehicles
                     </a>
-                    <a href="{{ url('/transactions') }}" class="text-gray-700 hover:text-blue-600 transition font-medium">
+                    <a href="{{ url('/transactions') }}" class="nav-link text-gray-700 hover:text-blue-600 transition font-medium">
                         <i class="fas fa-list mr-1"></i> Transactions
                     </a>
-                    <a href="{{ url('/payment-history') }}" class="text-gray-700 hover:text-blue-600 transition font-medium">
+                    <a href="{{ url('/payment-history') }}" class="nav-link text-gray-700 hover:text-blue-600 transition font-medium">
                         <i class="fas fa-history mr-1"></i> Payment History
                     </a>
                 </div>
@@ -80,12 +96,26 @@
                 <span><i class="fas fa-dollar-sign mr-1"></i> $2 per hour after</span>
                 <span><i class="fas fa-wheelchair mr-1"></i> 20% discount for PWD/Senior</span>
                 <span><i class="fas fa-car mr-1"></i> 50 parking slots available</span>
+                <span><i class="fas fa-map-marked-alt mr-1"></i> 5 floors (B1, B2, B3, B4, L1)</span>
             </div>
             <p class="text-gray-400 text-xs">
                 &copy; {{ date('Y') }} MallPark System. All rights reserved.
             </p>
         </div>
     </footer>
+
+    <script>
+        // Active link highlighting based on current URL
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentUrl = window.location.pathname;
+            document.querySelectorAll('.nav-link').forEach(link => {
+                const href = link.getAttribute('href');
+                if (href === currentUrl || (currentUrl === '/' && href === '/dashboard')) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
 
     @stack('scripts')
 </body>
